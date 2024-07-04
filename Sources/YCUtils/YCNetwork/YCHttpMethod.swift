@@ -10,5 +10,3 @@ public enum YCHttpMethod: String {
     case put = "PUT"
     case delete = "DELETE"
 }
-
-
