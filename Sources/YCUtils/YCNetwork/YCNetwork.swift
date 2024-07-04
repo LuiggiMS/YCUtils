@@ -36,7 +36,12 @@ public class YCNetwork {
             }
             
             if log, let responseString = String(data: data, encoding: .utf8) {
-                debugPrint("⚠️ Response: \(responseString)")
+                print("[YCNetwork] ⚠️ Url: \(url) - Status Code: \(httpResponse.statusCode)")
+                
+                if let body = body {
+                    print("[YCNetwork] ⚠️ Body: \(body)")
+                }
+                print("[YCNetwork] ⚠️ Response:\n\(responseString)")
             }
             
             switch httpResponse.statusCode {
@@ -46,7 +51,7 @@ public class YCNetwork {
                     return result
                 } catch {
                     if log {
-                        debugPrint("⚠️ Decoding Error: \(error)")
+                        print("[YCNetwork] ⚠️ Decoding Error: \(error)")
                     }
                     throw YCNetworkError.decodingError
                 }
@@ -61,6 +66,9 @@ public class YCNetwork {
             if (error as NSError).domain == NSURLErrorDomain && (error as NSError).code == NSURLErrorNotConnectedToInternet {
                 throw YCNetworkError.noInternet
             } else {
+                if log {
+                    print("[YCNetwork] ⚠️ Error: \(error)")
+                }
                 throw error
             }
         }
