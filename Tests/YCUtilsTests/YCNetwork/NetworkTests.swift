@@ -54,10 +54,13 @@ class NetworkingTests: XCTestCase {
         let body: [String: Any] = ["usuario_id": 4]
 
         // Act
-        let result = try await networkService.request(.post, url: url, body: body, resultType: UsuarioRJResponse.self)
-
-        // Assert
-        XCTAssertEqual(result.results.nombres, "Daniel")
+        do {
+            let result = try await networkService.request(.post, url: url, body: body, resultType: UsuarioRJResponse.self)
+            // Assert
+            XCTAssertEqual(result.results.nombres, "Daniel")
+        } catch {
+            XCTFail("\(error)")
+        }
     }
     
     func testDecodingError() async throws {
@@ -101,6 +104,31 @@ class NetworkingTests: XCTestCase {
                     XCTAssertTrue(true)
                 default:
                     XCTFail("Expected decodingError, but got \(networkError)")
+                }
+            } else {
+                XCTFail("Expected YCNetworkError, but got \(error)")
+            }
+        }
+    }
+    
+    func testBadRequestError() async throws {
+        // Arrange
+        let token = "badToken"
+        let networkService = YCNetwork(token: token, log: true)
+        let url = URL(string: "http://red-jovenes.yadux.com/api-app/miembro-info/")!
+        let expectedResult = YCNetworkError.badRequest
+
+        // Act
+        do {
+            _ = try await networkService.request(.post, url: url, resultType: UsuarioRJResponse.self)
+        } catch {
+            // Assert
+            if let networkError = error as? YCNetworkError {
+                switch networkError {
+                case expectedResult:
+                    XCTAssertTrue(true)
+                default:
+                    XCTFail("Expected barRequestError, but got \(networkError)")
                 }
             } else {
                 XCTFail("Expected YCNetworkError, but got \(error)")
