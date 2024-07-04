@@ -5,6 +5,10 @@ import PackageDescription
 
 let package = Package(
     name: "YCUtils",
+    platforms: [
+        .macOS(.v13),  // Specifies macOS 13 as the minimum supported version
+        .iOS(.v15)     // Specifies iOS 15 as the minimum supported version
+    ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(

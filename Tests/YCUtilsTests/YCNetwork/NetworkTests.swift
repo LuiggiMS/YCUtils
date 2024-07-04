@@ -1,0 +1,111 @@
+//
+//  File.swift
+//  
+//
+//  Created by Daniel Minaya on 4/07/24.
+//
+
+import Foundation
+import XCTest
+@testable import YCUtils
+
+class NetworkingTests: XCTestCase {
+    let networkService = YCNetwork(log: true)
+
+    override func setUp() {
+        super.setUp()
+        // Put setup code here. This method is called before the invocation of each test method in the class.
+    }
+    
+    override func tearDown() {
+        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        super.tearDown()
+    }
+    
+    func testGetTodoRequest() async throws {
+        // Arrange
+        let url = URL(string: "https://jsonplaceholder.typicode.com/todos/1")!
+        let expectedResult = TodoResponse(userId: 1, id: 1, title: "delectus aut autem", completed: false)
+        
+        // Act
+        let result: TodoResponse = try await networkService.request(.get, url: url, resultType: TodoResponse.self)
+
+        // Assert
+        XCTAssertEqual(result, expectedResult)
+    }
+    
+    func testGetPokemonRequest() async throws {
+        // Arrange
+        let url = URL(string: "https://pokeapi.co/api/v2/pokemon/pikachu")!
+        let expectedResult = PokemonResponse(id: 25, name: "pikachu", height: 4)
+        
+        // Act
+        let result = try await networkService.request(.get, url: url, resultType: PokemonResponse.self)
+
+        // Assert
+        XCTAssertEqual(result, expectedResult)
+    }
+    
+    func testGetUsuarioRJRequest() async throws {
+        // Arrange
+        let token = "27d255009411fd276ed086fcb3d02b53a98671de"
+        let networkService = YCNetwork(token: token, log: true)
+        let url = URL(string: "http://red-jovenes.yadux.com/api-app/miembro-info/")!
+        let body: [String: Any] = ["usuario_id": 4]
+
+        // Act
+        let result = try await networkService.request(.post, url: url, body: body, resultType: UsuarioRJResponse.self)
+
+        // Assert
+        XCTAssertEqual(result.results.nombres, "Daniel")
+    }
+    
+    func testDecodingError() async throws {
+        // Arrange
+        let url = URL(string: "https://jsonplaceholder.typicode.com/todos/1")!
+        let expectedResult = YCNetworkError.decodingError
+        
+        // Act
+        do {
+            _ = try await networkService.request(.get, url: url, resultType: FailResponse.self)
+        } catch {
+            // Assert
+            if let networkError = error as? YCNetworkError {
+                switch networkError {
+                case expectedResult:
+                    XCTAssertTrue(true)
+                default:
+                    XCTFail("Expected decodingError, but got \(networkError)")
+                }
+            } else {
+                XCTFail("Expected YCNetworkError, but got \(error)")
+            }
+        }
+
+        
+    }
+    
+    func testServerError() async throws {
+        // Arrange
+        let url = URL(string: "https://english-club-production.up.railway.app/docszz#/")!
+        let expectedResult = YCNetworkError.serverError
+        
+        // Act
+        do {
+            _ = try await networkService.request(.get, url: url, resultType: FailResponse.self)
+        } catch {
+            // Assert
+            if let networkError = error as? YCNetworkError {
+                switch networkError {
+                case expectedResult:
+                    XCTAssertTrue(true)
+                default:
+                    XCTFail("Expected decodingError, but got \(networkError)")
+                }
+            } else {
+                XCTFail("Expected YCNetworkError, but got \(error)")
+            }
+        }
+    }
+    
+}
