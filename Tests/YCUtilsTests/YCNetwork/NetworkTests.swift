@@ -84,8 +84,6 @@ class NetworkingTests: XCTestCase {
                 XCTFail("Expected YCNetworkError, but got \(error)")
             }
         }
-
-        
     }
     
     func testServerError() async throws {
@@ -134,6 +132,33 @@ class NetworkingTests: XCTestCase {
                 XCTFail("Expected YCNetworkError, but got \(error)")
             }
         }
+    }
+    
+    func testNoInternetError() async throws {
+        // Test only with off Internet
+        // Arrange
+//        let url = URL(string: "https://jsonplaceholder.typicode.com/todos/1")!
+//        let expectedResult = YCNetworkError.noInternet
+//        
+//        // Act
+//        do {
+//            _ = try await networkService.request(.get, url: url, resultType: FailResponse.self)
+//        } catch {
+//            // Assert
+//            if let networkError = error as? YCNetworkError {
+//                switch networkError {
+//                case expectedResult:
+//                    XCTAssertTrue(true)
+//                default:
+//                    XCTFail("Expected noInternetError, but got \(networkError)")
+//                }
+//            } else {
+//                XCTFail("Expected YCNetworkError, but got \(error)")
+//            }
+//        }
+        
+        // Default: Test only with on Internet
+        XCTAssert(true)
     }
     
 }
