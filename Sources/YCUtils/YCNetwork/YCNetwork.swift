@@ -9,10 +9,13 @@ public class YCNetwork {
     private var token: String?
     private var log: Bool
     
-    public init(urlSession: URLSession = .shared, token: String? = nil, log: Bool = false) {
+    public init(urlSession: URLSession = .shared, log: Bool = false) {
         self.urlSession = urlSession
-        self.token = token
         self.log = log
+    }
+    
+    public func setToken(_ token: String) {
+        self.token = token
     }
     
     public func request<T>(_ method: YCHttpMethod, url: URL, body: [String: Any]? = nil, resultType: T.Type) async throws -> T where T: Decodable {
@@ -25,7 +28,7 @@ public class YCNetwork {
         }
         
         if let token = token {
-            request.setValue("Token \(token)", forHTTPHeaderField: "Authorization")
+            request.setValue(token, forHTTPHeaderField: "Authorization")
         }
         
         do {
@@ -55,6 +58,57 @@ public class YCNetwork {
                     }
                     throw YCNetworkError.decodingError
                 }
+            case 400...499:
+                throw YCNetworkError.badRequest
+            case 500...599:
+                throw YCNetworkError.serverError
+            default:
+                throw YCNetworkError.unknown
+            }
+        } catch {
+            if (error as NSError).domain == NSURLErrorDomain && (error as NSError).code == NSURLErrorNotConnectedToInternet {
+                throw YCNetworkError.noInternet
+            } else {
+                if log {
+                    print("[YCNetwork] ⚠️ Error: \(error)")
+                }
+                throw error
+            }
+        }
+    }
+    
+    public func request(_ method: YCHttpMethod, url: URL, body: [String: Any]? = nil) async throws {
+        var request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy)
+        request.httpMethod = method.rawValue
+
+        if let body = body {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        }
+        
+        if let token = token {
+            request.setValue(token, forHTTPHeaderField: "Authorization")
+        }
+        
+        do {
+            let (data, response) = try await urlSession.data(for: request)
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw YCNetworkError.invalidResponse
+            }
+            
+            if log, let responseString = String(data: data, encoding: .utf8) {
+                print("[YCNetwork] ⚠️ Url: \(url) - Status Code: \(httpResponse.statusCode)")
+                
+                if let body = body {
+                    print("[YCNetwork] ⚠️ Body: \(body)")
+                }
+                print("[YCNetwork] ⚠️ Response:\n\(responseString)")
+            }
+            
+            switch httpResponse.statusCode {
+            case 200...299:
+                return
             case 400...499:
                 throw YCNetworkError.badRequest
             case 500...599:

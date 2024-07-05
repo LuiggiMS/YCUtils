@@ -48,8 +48,9 @@ class NetworkingTests: XCTestCase {
     
     func testGetUsuarioRJRequest() async throws {
         // Arrange
-        let token = "27d255009411fd276ed086fcb3d02b53a98671de"
-        let networkService = YCNetwork(token: token, log: true)
+        let token = "Token 27d255009411fd276ed086fcb3d02b53a98671de"
+        let networkService = YCNetwork(log: true)
+        networkService.setToken(token)
         let url = URL(string: "http://red-jovenes.yadux.com/api-app/miembro-info/")!
         let body: [String: Any] = ["usuario_id": 4]
 
@@ -112,7 +113,8 @@ class NetworkingTests: XCTestCase {
     func testBadRequestError() async throws {
         // Arrange
         let token = "badToken"
-        let networkService = YCNetwork(token: token, log: true)
+        let networkService = YCNetwork(log: true)
+        networkService.setToken(token)
         let url = URL(string: "http://red-jovenes.yadux.com/api-app/miembro-info/")!
         let expectedResult = YCNetworkError.badRequest
 
