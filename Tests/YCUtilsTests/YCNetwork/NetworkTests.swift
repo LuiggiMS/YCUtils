@@ -163,4 +163,26 @@ class NetworkingTests: XCTestCase {
         XCTAssert(true)
     }
     
+    func testUploadImage() async throws {
+        // Arrange
+        let token = "Client-ID 07a8a87dd43c7a0"
+        let url = URL(string: "https://api.imgur.com/3/upload")!
+        let expectedInitialURLResult = "https://i.imgur.com"
+        let mimeType = "image/jpeg"
+        let networkService = YCNetwork(log: true)
+        networkService.setToken(token)
+        guard let bundleUrl = Bundle.module.url(forResource: "swift-logo", withExtension: "png"),
+        let imageData = try? Data(contentsOf: bundleUrl) else {
+            XCTFail("Failed to load test image")
+            return
+        }
+
+        // Act
+        let result = try await networkService.upload(data: imageData, url: url, mimeType: mimeType, resultType: UploadedImageResponse.self)
+        
+        // Assert
+        XCTAssertNotNil(result.data.link)
+        XCTAssertTrue(result.data.link.contains(expectedInitialURLResult))
+    }
+    
 }

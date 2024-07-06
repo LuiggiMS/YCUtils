@@ -22,6 +22,8 @@ let package = Package(
             name: "YCUtils"),
         .testTarget(
             name: "YCUtilsTests",
-            dependencies: ["YCUtils"]),
+            dependencies: ["YCUtils"],
+            resources: [.copy("Resources/swift-logo.png")]
+        ),
     ]
 )
